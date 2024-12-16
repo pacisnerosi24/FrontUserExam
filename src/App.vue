@@ -1,26 +1,45 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app">
+    <header>
+      <h1>Gestión de Usuarios</h1>
+    </header>
+
+    <UserForm @user-saved="getUsers" />
+    <UserList :users="users" @user-edited="editUser" @user-deleted="getUsers" />
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import UserForm from './components/UserForm.vue';
+import UserList from './components/UserList.vue';
 
 export default {
-  name: 'App',
+  data() {
+    return {
+      users: []
+    }
+  },
   components: {
-    HelloWorld
+    UserForm,
+    UserList
+  },
+  methods: {
+    async getUsers() {
+      try {
+        const response = await fetch('http://localhost:8000/api/users');
+        this.users = await response.json();
+      } catch (error) {
+        console.error('Error al obtener los usuarios:', error);
+      }
+    },
+    editUser(user) {
+      this.$refs.userForm.setUserToEdit(user);
+    }
+  },
+  mounted() {
+    this.getUsers();
   }
 }
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+<style src="./assets/styles.css"></style>
