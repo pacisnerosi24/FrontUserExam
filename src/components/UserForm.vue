@@ -1,80 +1,68 @@
 <template>
-  <section class="form-container">
-    <h2>{{ user.id ? 'Editar Usuario' : 'Crear Usuario' }}</h2>
-
-    <form @submit.prevent="saveUser" class="user-form">
-      <input v-model="user.id" type="hidden">
-
-      <div class="form-group">
-        <label for="name">Nombre</label>
-        <input id="name" v-model="user.name" placeholder="Ingrese el nombre" required>
-      </div>
-
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input id="email" v-model="user.email" type="email" placeholder="Ingrese el correo" required>
-      </div>
-
-      <div class="form-group">
-        <label for="password">Contraseña</label>
-        <input id="password" v-model="user.password" type="password" placeholder="Ingrese la contraseña" :required="!user.id">
-      </div>
-
-      <div class="button-group">
-        <button type="submit" class="btn btn-primary">{{ user.id ? 'Actualizar' : 'Guardar' }}</button>
-        <button type="button" @click="resetForm" class="btn btn-secondary">Cancelar</button>
-      </div>
+  <div class="form-container">
+    <h2>Crear Usuario</h2>
+    <form @submit.prevent="saveUser">
+      <input v-model="user.name" type="text" placeholder="Nombre" required />
+      <input v-model="user.email" type="email" placeholder="Correo" required />
+      <input v-model="user.password" type="password" placeholder="Contraseña" required />
+      <button type="submit">Guardar Usuario</button>
     </form>
-  </section>
+  </div>
 </template>
 
 <script>
+import axios from '../axios'; // Importa la instancia de Axios
+
 export default {
   data() {
     return {
       user: {
-        id: null,
         name: '',
         email: '',
         password: ''
       }
-    }
+    };
   },
   methods: {
     async saveUser() {
-      const method = this.user.id ? 'PUT' : 'POST';
-      const url = this.user.id 
-        ? `http://localhost:8000/api/users/${this.user.id}` 
-        : 'http://localhost:8000/api/users';
-
       try {
-        const response = await fetch(url, {
-          method: method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.user)
-        });
-
-        if (!response.ok) throw new Error(`Error al guardar usuario: ${response.statusText}`);
-
-        this.$emit('user-saved');
+        const response = await axios.post('users', this.user); // POST a http://localhost:3000/api/users
+        console.log('Usuario creado:', response.data);
+        this.$emit('user-saved'); // Emitir evento para actualizar la lista de usuarios
         this.resetForm();
       } catch (error) {
-        console.error('Error al guardar el usuario:', error);
+        console.error('Error al guardar usuario:', error);
       }
     },
     resetForm() {
-      this.user = {
-        id: null,
-        name: '',
-        email: '',
-        password: ''
-      };
-    },
-    setUserToEdit(user) {
-      this.user = { ...user, password: '' };
+      this.user = { name: '', email: '', password: '' };
     }
   }
-}
+};
 </script>
 
-<style src="../assets/styles.css"></style>
+<style scoped>
+/* Estilos del formulario */
+.form-container {
+  padding: 20px;
+}
+
+input {
+  margin-bottom: 10px;
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 10px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+</style>
